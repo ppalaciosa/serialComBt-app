@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Serial Communication</string>
+    <string name="action_settings">Settings</string>
+    <string name="btOff">BT Off</string>
+    <string name="btOn">BT On</string>
+    <string name="Scan">Buscar dispositivos</string>
+</resources>
