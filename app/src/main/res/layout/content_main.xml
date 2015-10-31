@@ -23,7 +23,8 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:layout_marginBottom="20dp">
+            android:layout_marginBottom="20dp"
+            android:layout_gravity="center">
 
             <Switch
                 android:layout_width="wrap_content"
@@ -31,7 +32,8 @@
                 android:textOn="@string/btOn"
                 android:textOff="@string/btOff"
                 android:id="@+id/btButton"
-                android:layout_gravity="center_horizontal" />
+                android:switchMinWidth="100dp"
+                android:layout_gravity="center" />
 
 
         </LinearLayout>
@@ -40,13 +42,15 @@
             android:orientation="horizontal"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:gravity="center">
+            android:gravity="center"
+            android:weightSum="1">
 
             <Button
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="75dp"
                 android:text="@string/Scan"
-                android:id="@+id/scan" />
+                android:id="@+id/scan"
+                android:layout_weight="0.46" />
 
         </LinearLayout>
 
@@ -72,7 +76,8 @@
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"></LinearLayout>
+            android:layout_gravity="center_horizontal">
+        </LinearLayout>
 
         <ListView
             android:layout_width="match_parent"
