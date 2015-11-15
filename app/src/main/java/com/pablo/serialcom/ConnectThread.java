@@ -1,56 +1,95 @@
 package com.pablo.serialcom;
 
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.UUID;
 
 /**
  * Created by User on 6/3/2015.
  */
-public class ConnectThread extends Thread{
 
-    private final BluetoothDevice bTDevice;
-    private final BluetoothSocket bTSocket;
+public class ConnectThread extends Thread {
+    private final BluetoothSocket mmSocket;
+    private final BluetoothDevice mmDevice;
+    static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
 
-    public ConnectThread(BluetoothDevice bTDevice, UUID UUID) {
+    BluetoothAdapter mBluetoothAdapter = MainActivity.mBluetoothAdapter;
+    private OutputStream outStream = null;
+
+    // Method to send data
+    private void sendData(String message) {
+        byte[] msgBuffer = message.getBytes();
+
+        try {
+            //attempt to place data on the outstream to the BT device
+            outStream.write(msgBuffer);
+        } catch (IOException e) {
+            //if the sending fails this is most likely because device is no longer there
+            //Toast.makeText(getBaseContext(), "ERROR - Device not found", Toast.LENGTH_SHORT).show();
+            //finish();
+        }
+    }
+
+    public void manageConnectedSocket (BluetoothSocket Socket) {
+        try {
+            outStream = mmSocket.getOutputStream();
+        } catch (IOException e) {
+            //Toast.makeText(getBaseContext(), "ERROR - Could not create bluetooth outstream", Toast.LENGTH_SHORT).show();
+            Log.d("CONNECTTHREAD", "ERROR - Could not create bluetooth outstream");
+        }
+        //When activity is resumed, attempt to send a piece of junk data ('x') so that it will fail if not connected
+        // i.e don't wait for a user to press button to recognise connection failure
+
+        //
+        // "a" -> prende
+        // "b" -> apaga
+        sendData("a");
+
+    }
+
+    public ConnectThread(BluetoothDevice device) {
+        // Use a temporary object that is later assigned to mmSocket,
+        // because mmSocket is final
         BluetoothSocket tmp = null;
-        this.bTDevice = bTDevice;
-
+        mmDevice = device;
+        // Get a BluetoothSocket to connect with the given BluetoothDevice
         try {
-            tmp = this.bTDevice.createRfcommSocketToServiceRecord(UUID);
+            // MY_UUID is the app's UUID string, also used by the server code
+            tmp = device.createRfcommSocketToServiceRecord(MY_UUID);
+        } catch (IOException e) {
+            Log.d("CONNECTTHREAD", "Could not create RFCOMM socket:" + e.toString());
+            //return false;
         }
-        catch (IOException e) {
-            Log.d("CONNECTTHREAD", "Could not start listening for RFCOMM");
-        }
-        bTSocket = tmp;
+        mmSocket = tmp;
     }
 
-    public boolean connect() {
+    public void run() {
+        // Cancel discovery because it will slow down the connection
+        mBluetoothAdapter.cancelDiscovery();
 
         try {
-            bTSocket.connect();
-        } catch(IOException e) {
-            Log.d("CONNECTTHREAD","Could not connect: " + e.toString());
+            // Connect the device through the socket. This will block
+            // until it succeeds or throws an exception
+            mmSocket.connect();
+        } catch (IOException connectException) {
+            // Unable to connect; close the socket and get out
+            connectException.printStackTrace();
             try {
-                bTSocket.close();
-            } catch(IOException close) {
-                Log.d("CONNECTTHREAD", "Could not close connection:" + e.toString());
-                return false;
+                mmSocket.close();
+            } catch (IOException closeException) {
+                closeException.printStackTrace();
             }
+            return;
         }
-        return true;
+
+        // Do work to manage the connection (in a separate thread)
+        manageConnectedSocket(mmSocket);
     }
 
-    public boolean cancel() {
-        try {
-            bTSocket.close();
-        } catch(IOException e) {
-            return false;
-        }
-        return true;
-    }
 
 }
